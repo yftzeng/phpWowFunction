@@ -26,8 +26,21 @@ class WowFunction
 {
 
     private static $_default_conn_timeout = 5;
+    private static $_encrypt_alg = 'AES-256-CTR';
     private static $_encrypt_key = '1234567812345678';
     private static $_encrypt_iv = '1234567812345678';
+
+    /**
+     * @param string $alg encryption algorithm
+     *
+     * @comment set encryption algorithm
+     *
+     * @return void
+     */
+    public static function setEncryptAlg($alg)
+    {
+        self::$_encrypt_alg = $alg;
+    }
 
     /**
      * @param string $key encryption key
@@ -424,6 +437,54 @@ class WowFunction
 
     /**
      * @param string $data data
+     * @param string $alg  encryption algorithm
+     * @param string $key  encryption key
+     * @param string $iv   initialization vector
+     *
+     * @comment encryption
+     *
+     * @return string
+     */
+    public static function encode($data, $alg = null, $key = null, $iv = null)
+    {
+        if ($alg !== null) {
+            self::$_encrypt_alg = $alg;
+        }
+        if ($key !== null) {
+            self::$_encrypt_key = $key;
+        }
+        if ($iv !== null) {
+            self::$_encrypt_iv = $iv;
+        }
+        return openssl_encrypt($data, self::$_encrypt_alg, self::$_encrypt_key, false, self::$_encrypt_iv);
+    }
+
+    /**
+     * @param string $data data
+     * @param string $alg  encryption algorithm
+     * @param string $key  encryption key
+     * @param string $iv   initialization vector
+     *
+     * @comment decryption
+     *
+     * @return string
+     */
+    public static function decode($data, $alg = null, $key = null, $iv = null)
+    {
+        if ($alg !== null) {
+            self::$_encrypt_alg = $alg;
+        }
+        if ($key !== null) {
+            self::$_encrypt_key = $key;
+        }
+        if ($iv !== null) {
+            self::$_encrypt_iv = $iv;
+        }
+        return openssl_decrypt($data, self::$_encrypt_alg, self::$_encrypt_key, false, self::$_encrypt_iv);
+    }
+
+    /**
+     * @param string $data data
      * @param string $key  encryption key
      * @param string $iv   initialization vector
      *
@@ -431,9 +492,15 @@ class WowFunction
      *
      * @return string
      */
-    public static function aesEncode($data, $key = null, $iv = null)
+    public static function aesCtrEncode($data, $key = null, $iv = null)
     {
-        return openssl_encrypt($data, 'AES-256-CTR', $key, false, $iv);
+        if ($key !== null) {
+            self::$_encrypt_key = $key;
+        }
+        if ($iv !== null) {
+            self::$_encrypt_iv = $iv;
+        }
+        return openssl_encrypt($data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv);
     }
 
     /**
@@ -445,8 +512,14 @@ class WowFunction
      *
      * @return string
      */
-    public static function aesDecode($data, $key = null, $iv = null)
+    public static function aesCtrDecode($data, $key = null, $iv = null)
     {
-        return openssl_decrypt($data, 'AES-256-CTR', $key, false, $iv);
+        if ($key !== null) {
+            self::$_encrypt_key = $key;
+        }
+        if ($iv !== null) {
+            self::$_encrypt_iv = $iv;
+        }
+        return openssl_decrypt($data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv);
     }
 }

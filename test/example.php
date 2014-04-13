@@ -4,19 +4,24 @@ include __DIR__.'/bootstrap.php';
 
 use Wow\Util\WowFunction as F;
 
+$encode = F::encode('data');
+$decode = F::decode($encode);
+echo "encode        => $encode\n";
+echo "decode        => $decode\n";
+
 $key = '1234567812345678';
 $iv  = '1234567812345678';
 
-$aes_encode = F::aesEncode('data', $key, $iv);
-$aes_decode = F::aesDecode($aes_encode, $key, $iv);
+$aes_encode = F::aesCtrEncode('data', $key, $iv);
+$aes_decode = F::aesCtrDecode($aes_encode, $key, $iv);
 echo "aes_encode        => $aes_encode\n";
 echo "aes_decode        => $aes_decode\n";
 
 F::setEncryptKey($key);
 F::setEncryptIv($iv);
 
-$aes_encode = F::aesEncode('data', $key, $iv);
-$aes_decode = F::aesDecode($aes_encode, $key, $iv);
+$aes_encode = F::aesCtrEncode('data', $key, $iv);
+$aes_decode = F::aesCtrDecode($aes_encode, $key, $iv);
 echo "aes_encode        => $aes_encode\n";
 echo "aes_decode        => $aes_decode\n";
 
