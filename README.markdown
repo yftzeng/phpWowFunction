@@ -1,4 +1,4 @@
-# phpWowUuid
+# phpWowFunction
 
 Wow! Function for PHP. Collec function scripts for us
 
