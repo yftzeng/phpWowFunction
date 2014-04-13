@@ -26,6 +26,32 @@ class WowFunction
 {
 
     private static $_default_conn_timeout = 5;
+    private static $_encrypt_key = '1234567812345678';
+    private static $_encrypt_iv = '1234567812345678';
+
+    /**
+     * @param string $key encryption key
+     *
+     * @comment set encryption key
+     *
+     * @return void
+     */
+    public static function setEncryptKey($key)
+    {
+        self::$_encrypt_key = $key;
+    }
+
+    /**
+     * @param string $iv encryption iv
+     *
+     * @comment set encryption iv
+     *
+     * @return void
+     */
+    public static function setEncryptIv($iv)
+    {
+        self::$_encrypt_iv = $iv;
+    }
 
     /**
      * @comment return current time
@@ -405,7 +431,7 @@ class WowFunction
      *
      * @return string
      */
-    public static function aesEncode($data, $key, $iv)
+    public static function aesEncode($data, $key = null, $iv = null)
     {
         return openssl_encrypt($data, 'AES-256-CTR', $key, false, $iv);
     }
@@ -419,7 +445,7 @@ class WowFunction
      *
      * @return string
      */
-    public static function aesDecode($data, $key, $iv)
+    public static function aesDecode($data, $key = null, $iv = null)
     {
         return openssl_decrypt($data, 'AES-256-CTR', $key, false, $iv);
     }

@@ -12,6 +12,14 @@ $aes_decode = F::aesDecode($aes_encode, $key, $iv);
 echo "aes_encode        => $aes_encode\n";
 echo "aes_decode        => $aes_decode\n";
 
+F::setEncryptKey($key);
+F::setEncryptIv($iv);
+
+$aes_encode = F::aesEncode('data', $key, $iv);
+$aes_decode = F::aesDecode($aes_encode, $key, $iv);
+echo "aes_encode        => $aes_encode\n";
+echo "aes_decode        => $aes_decode\n";
+
 echo "currenttime       => " . F::currentTime() . "\n";
 echo "currenttime (UTC) => " . F::currentUtcTime() . "\n";
 
