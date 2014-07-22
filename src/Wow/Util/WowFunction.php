@@ -307,11 +307,11 @@ class WowFunction
      * @param string $url     url
      * @param string $timeout sencods for connection timeout
      *
-     * @comment async http get by curl
+     * @comment async http get by fsockopen
      *
-     * @return string|boolean
+     * @return boolean
      */
-    public static function curlGetAsync($url, $timeout = null)
+    public static function httpGet($url, $timeout = null)
     {
         if (null === $timeout) {
             $timeout = self::$_default_conn_timeout;
@@ -319,9 +319,16 @@ class WowFunction
 
         $parts = parse_url($url);
 
+        $scheme = '';
+        $port = 80;
+        if ($parts['scheme'] === 'https') {
+            $scheme = 'ssl://';
+            $port = 443;
+        }
+
         $fp = fsockopen(
-            $parts['host'],
-            isset($parts['port'])?$parts['port']:80,
+            $scheme . $parts['host'],
+            isset($parts['port'])?$parts['port']:$port,
             $errno, $errstr, $timeout
         );
 
@@ -334,11 +341,17 @@ class WowFunction
             $query = $parts['path'];
         }
         if (isset($parts['query'])) {
-            $query .= '?' . $parts['query'];
+            if (is_array($parts['query'])) {
+                $query .= '?' . http_build_query($parts['query']);
+            }
+            else {
+                $query .= '?' . $parts['query'];
+            }
         }
 
         $out = "GET ".$query." HTTP/1.1\r\n";
         $out.= "Host: ".$parts['host']."\r\n";
+        //$out.= "Accept-Encoding: gzip, deflate, compress;q=0.9\r\n";
         $out.= "Connection: Close\r\n\r\n";
         if (isset($params)) {
             $out.= $params;
@@ -346,6 +359,7 @@ class WowFunction
 
         fwrite($fp, $out);
         fclose($fp);
+        return true;
     }
 
     /**
@@ -353,14 +367,14 @@ class WowFunction
      * @param string $params  url parameters
      * @param string $timeout sencods for connection timeout
      *
-     * @comment async http post by curl
+     * @comment async http post by fsockopen
      * http://petewarden.typepad.com/searchbrowser/2008/06/how-to-post-an.html
      * http://w-shadow.com/blog/2007/10/16/how-to-run-a-php-script-in-the-background/
      * Modified by: yftzeng (yftzeng@gmail.com)
      *
-     * @return string|boolean
+     * @return boolean
      */
-    public static function curlPostAsync($url, $params = null, $timeout = null)
+    public static function httpPost($url, $params = null, $timeout = null)
     {
         if (null === $timeout) {
             $timeout = self::$default_conn_timeout;
@@ -378,9 +392,16 @@ class WowFunction
 
         $parts = parse_url($url);
 
+        $scheme = '';
+        $port = 80;
+        if ($parts['scheme'] === 'https') {
+            $scheme = 'ssl://';
+            $port = 443;
+        }
+
         $fp = fsockopen(
-            $parts['host'],
-            isset($parts['port'])?$parts['port']:80,
+            $scheme . $parts['host'],
+            isset($parts['port'])?$parts['port']:$port,
             $errno, $errstr, $timeout
         );
 
@@ -394,6 +415,7 @@ class WowFunction
         $out.= "Host: ".$parts['host']."\r\n";
         $out.= "Content-Type: application/x-www-form-urlencoded\r\n";
         $out.= "Content-Length: ".strlen($params)."\r\n";
+        //$out.= "Accept-Encoding: gzip, deflate, compress;q=0.9\r\n";
         $out.= "Connection: Close\r\n\r\n";
         if (isset($params)) {
             $out.= $params;
@@ -401,6 +423,7 @@ class WowFunction
 
         fwrite($fp, $out);
         fclose($fp);
+        return true;
     }
 
     /**
