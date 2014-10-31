@@ -30,6 +30,11 @@ class WowFunction
     private static $_encrypt_key = '1234567812345678';
     private static $_encrypt_iv = '1234567812345678';
 
+    private static $_STRING_EXCL = true;
+    private static $_STRING_INCL = false;
+    private static $_STRING_BEFORE = true;
+    private static $_STRING_AFTER = false;
+
     /**
      * @param string $alg encryption algorithm
      *
@@ -134,6 +139,30 @@ class WowFunction
                 )
             ), true
         );
+    }
+
+    /**
+     * @param string $root xml root
+     * @param string $return operation string
+     *
+     * @comment assocArrayToXML
+     *
+     * @return string
+     */
+    public static function assocArrayToXML($root, $return)
+    {
+        $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?"."><{$root}></{$root}>");
+        $f = create_function('$f,$c,$a', '
+                foreach($a as $k=>$v) {
+                    if(is_array($v)) {
+                        $ch=$c->addChild($k);
+                        $f($f,$ch,$v);
+                    } else {
+                        $c->addChild($k,$v);
+                    }
+                }');
+        $f($f,$xml,$ar);
+        return $xml->asXML();
     }
 
     /**
@@ -544,5 +573,61 @@ class WowFunction
             self::$_encrypt_iv = $iv;
         }
         return openssl_decrypt($data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv);
+    }
+
+    /**
+     * @param string $string string
+     * @param string $delineator  string delineator
+     * @param string $desired desired string
+     * @param boolean $type boolean type
+     *
+     * @comment string split function
+     *
+     * @return string
+     */
+    public static function string_split($string, $delineator, $desired, $type)
+    {
+        # Case insensitive parse, convert string and delineator to lower case
+        $lc_str = strtolower($string);
+        $marker = strtolower($delineator);
+
+        # Return text BEFORE the delineator
+        if($desired === self::$_STRING_BEFORE)
+        {
+            if($type === self::$_STRING_EXCL)  // Return text ESCL of the delineator
+                $split_here = strpos($lc_str, $marker);
+            else               // Return text INCL of the delineator
+                $split_here = strpos($lc_str, $marker) + strlen($marker);
+
+            $parsed_string = substr($string, 0, $split_here);
+        }
+        # Return text AFTER the delineator
+        else
+        {
+            if($type === self::_STRING_EXCL)    // Return text ESCL of the delineator
+                $split_here = strpos($lc_str, $marker) + strlen($marker);
+            else               // Return text INCL of the delineator
+                $split_here = strpos($lc_str, $marker) ;
+
+            $parsed_string =  substr($string, $split_here, strlen($string));
+        }
+        return $parsed_string;
+    }
+
+    /**
+     * @param string $string string
+     * @param string $start  string start
+     * @param string $stop string stop
+     * @param boolean $type boolean type
+     *
+     * @comment string between function
+     *
+     * @return string
+     */
+    public static function string_return_between($string, $start, $stop, $type)
+    {
+        return string_split(string_split($string, $start, self::$_STRING_AFTER, $type), $stop, self::$_STRING_BEFORE, $type);
+        //$temp = string_split($string, $start, self::$_STRING_AFTER,, $type);
+        //return string_split($temp, $stop, self::$_STRING_BEFORE,, $type);
     }
 }
