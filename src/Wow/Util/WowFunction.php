@@ -142,7 +142,7 @@ class WowFunction
     }
 
     /**
-     * @param string $root xml root
+     * @param string $root   xml root
      * @param string $return operation string
      *
      * @comment assocArrayToXML
@@ -152,15 +152,17 @@ class WowFunction
     public static function assocArrayToXML($root, $return)
     {
         $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?"."><{$root}></{$root}>");
-        $f = create_function('$f,$c,$a', '
-                foreach($a as $k=>$v) {
-                    if(is_array($v)) {
-                        $ch=$c->addChild($k);
-                        $f($f,$ch,$v);
-                    } else {
-                        $c->addChild($k,$v);
-                    }
-                }');
+        $f = create_function(
+            '$f,$c,$a', '
+            foreach($a as $k=>$v) {
+                if(is_array($v)) {
+                    $ch=$c->addChild($k);
+                    $f($f,$ch,$v);
+            } else {
+                $c->addChild($k,$v);
+            }
+            }'
+        );
         $f($f,$xml,$ar);
         return $xml->asXML();
     }
@@ -244,8 +246,10 @@ class WowFunction
      *
      * @return string
      */
-    function randomString($len, $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
-    {
+    function randomString(
+        $len,
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    ) {
         $len = (int)$len;
         $char_len = strlen($characters) - 1;
         $string = '';
@@ -372,8 +376,7 @@ class WowFunction
         if (isset($parts['query'])) {
             if (is_array($parts['query'])) {
                 $query .= '?' . http_build_query($parts['query']);
-            }
-            else {
+            } else {
                 $query .= '?' . $parts['query'];
             }
         }
@@ -508,7 +511,12 @@ class WowFunction
         if ($iv !== null) {
             self::$_encrypt_iv = $iv;
         }
-        return openssl_encrypt($data, self::$_encrypt_alg, self::$_encrypt_key, false, self::$_encrypt_iv);
+        return openssl_encrypt(
+            $data, self::$_encrypt_alg,
+            self::$_encrypt_key,
+            false,
+            self::$_encrypt_iv
+        );
     }
 
     /**
@@ -532,7 +540,12 @@ class WowFunction
         if ($iv !== null) {
             self::$_encrypt_iv = $iv;
         }
-        return openssl_decrypt($data, self::$_encrypt_alg, self::$_encrypt_key, false, self::$_encrypt_iv);
+        return openssl_decrypt(
+            $data, self::$_encrypt_alg,
+            self::$_encrypt_key,
+            false,
+            self::$_encrypt_iv
+        );
     }
 
     /**
@@ -552,7 +565,9 @@ class WowFunction
         if ($iv !== null) {
             self::$_encrypt_iv = $iv;
         }
-        return openssl_encrypt($data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv);
+        return openssl_encrypt(
+            $data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv
+        );
     }
 
     /**
@@ -572,42 +587,47 @@ class WowFunction
         if ($iv !== null) {
             self::$_encrypt_iv = $iv;
         }
-        return openssl_decrypt($data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv);
+        return openssl_decrypt(
+            $data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv
+        );
     }
 
     /**
-     * @param string $string string
-     * @param string $delineator  string delineator
-     * @param string $desired desired string
-     * @param boolean $type boolean type
+     * @param string  $string     string
+     * @param string  $delineator string delineator
+     * @param string  $desired    desired string
+     * @param boolean $type       boolean type
      *
      * @comment string split function
      *
      * @return string
      */
-    public static function string_split($string, $delineator, $desired, $type)
+    public static function stringSplit($string, $delineator, $desired, $type)
     {
-        # Case insensitive parse, convert string and delineator to lower case
+        // Case insensitive parse, convert string and delineator to lower case
         $lc_str = strtolower($string);
         $marker = strtolower($delineator);
 
-        # Return text BEFORE the delineator
-        if($desired === self::$_STRING_BEFORE)
-        {
-            if($type === self::$_STRING_EXCL)  // Return text ESCL of the delineator
+        // Return text BEFORE the delineator
+        if ($desired === self::$_STRING_BEFORE) {
+            if ($type === self::$_STRING_EXCL) {
+                // Return text ESCL of the delineator
                 $split_here = strpos($lc_str, $marker);
-            else               // Return text INCL of the delineator
+            } else {
+                // Return text INCL of the delineator
                 $split_here = strpos($lc_str, $marker) + strlen($marker);
+            }
 
             $parsed_string = substr($string, 0, $split_here);
-        }
-        # Return text AFTER the delineator
-        else
-        {
-            if($type === self::_STRING_EXCL)    // Return text ESCL of the delineator
+        } else {
+            // Return text AFTER the delineator
+            if ($type === self::_STRING_EXCL) {
+                // Return text ESCL of the delineator
                 $split_here = strpos($lc_str, $marker) + strlen($marker);
-            else               // Return text INCL of the delineator
-                $split_here = strpos($lc_str, $marker) ;
+            } else {
+                // Return text INCL of the delineator
+                $split_here = strpos($lc_str, $marker);
+            }
 
             $parsed_string =  substr($string, $split_here, strlen($string));
         }
@@ -615,19 +635,42 @@ class WowFunction
     }
 
     /**
-     * @param string $string string
-     * @param string $start  string start
-     * @param string $stop string stop
-     * @param boolean $type boolean type
+     * @param string  $string string
+     * @param string  $start  string start
+     * @param string  $stop   string stop
+     * @param boolean $type   boolean type
      *
      * @comment string between function
      *
      * @return string
      */
-    public static function string_return_between($string, $start, $stop, $type)
+    public static function stringReturnBetween($string, $start, $stop, $type)
     {
-        return string_split(string_split($string, $start, self::$_STRING_AFTER, $type), $stop, self::$_STRING_BEFORE, $type);
-        //$temp = string_split($string, $start, self::$_STRING_AFTER,, $type);
-        //return string_split($temp, $stop, self::$_STRING_BEFORE,, $type);
+        return stringSplit(
+            stringSplit(
+                $string, $start, self::$_STRING_AFTER, $type
+            ), $stop, self::$_STRING_BEFORE, $type
+        );
+        //$temp = stringSplit($string, $start, self::$_STRING_AFTER,, $type);
+        //return stringSplit($temp, $stop, self::$_STRING_BEFORE,, $type);
+    }
+
+    /**
+     * @param string $timestamp time string
+     *
+     * @comment get precise next month
+     *
+     * @return int
+     */
+    public static function getPreciseNextMonth($timestamp)
+    {
+        $int_month_of_time    = (int) date('m', strtotime($timestamp));
+        $int_addmonth_of_time = (int) date('m', strtotime($timestamp.'+1 month'));
+        if ($int_month_of_time === $int_addmonth_of_time-1
+            || $int_month_of_time === 12
+        ) {
+            return strtotime($timestamp.'+1 month');
+        }
+        return strtotime($timestamp.'last day of next month');
     }
 }
