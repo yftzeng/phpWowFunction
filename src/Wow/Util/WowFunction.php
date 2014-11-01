@@ -664,10 +664,10 @@ class WowFunction
      */
     public static function getPreciseNextMonth($timestamp)
     {
-        $int_month_of_time    = (int) date('m', strtotime($timestamp));
-        $int_addmonth_of_time = (int) date('m', strtotime($timestamp.'+1 month'));
-        if ($int_month_of_time === $int_addmonth_of_time-1
-            || $int_month_of_time === 12
+        $month_of_time    = (int) date('n', strtotime($timestamp));
+        $addmonth_of_time = (int) date('n', strtotime($timestamp.'+1 month'));
+        if ($month_of_time === $addmonth_of_time-1
+            || $month_of_time === 12
         ) {
             return strtotime($timestamp.'+1 month');
         }
