@@ -269,7 +269,7 @@ class WowFunction
      */
     public static function curlGet($url, $timeout = null)
     {
-        if (null === $timeout) {
+        if (null !== $timeout) {
             $timeout = self::$_default_conn_timeout;
         }
 
@@ -282,6 +282,8 @@ class WowFunction
             CURLOPT_TIMEOUT => $timeout
         );
         curl_setopt_array($ch, $options);
+        // http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
         $output = curl_exec($ch);
         if ($output === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
             curl_close($ch);
@@ -302,7 +304,7 @@ class WowFunction
      */
     public static function curlPost($url, $params = null, $timeout = null)
     {
-        if (null === $timeout) {
+        if (null !== $timeout) {
             $timeout = self::$_default_conn_timeout;
         }
 
@@ -327,6 +329,8 @@ class WowFunction
             CURLOPT_TIMEOUT => $timeout
         );
         curl_setopt_array($ch, $options);
+        // http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
         $output = curl_exec($ch);
         if ($output === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
             curl_close($ch);
@@ -346,7 +350,7 @@ class WowFunction
      */
     public static function httpGet($url, $timeout = null)
     {
-        if (null === $timeout) {
+        if (null !== $timeout) {
             $timeout = self::$_default_conn_timeout;
         }
 
@@ -408,7 +412,7 @@ class WowFunction
      */
     public static function httpPost($url, $params = null, $timeout = null)
     {
-        if (null === $timeout) {
+        if (null !== $timeout) {
             $timeout = self::$default_conn_timeout;
         }
 
