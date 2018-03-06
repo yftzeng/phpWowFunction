@@ -25,15 +25,16 @@ namespace Wow\Util;
 class WowFunction
 {
 
-    private static $_default_conn_timeout = 5;
-    private static $_encrypt_alg = 'AES-256-CTR';
-    private static $_encrypt_key = '1234567812345678';
-    private static $_encrypt_iv = '1234567812345678';
+    private static $default_conn_timeout = 5;
+    private static $default_useragent = 'Mozilla/5.0 (X11; Ubuntu;Linux x86_64; rv:55.0) Gecko/20100101 Firefox/55.0';
+    private static $encrypt_alg = 'AES-256-CTR';
+    private static $encrypt_key = '1234567812345678';
+    private static $encrypt_iv = '1234567812345678';
 
-    private static $_STRING_EXCL = true;
-    private static $_STRING_INCL = false;
-    private static $_STRING_BEFORE = true;
-    private static $_STRING_AFTER = false;
+    private static $STRING_EXCL = true;
+    private static $STRING_INCL = false;
+    private static $STRING_BEFORE = true;
+    private static $STRING_AFTER = false;
 
     /**
      * @param string $alg encryption algorithm
@@ -44,7 +45,7 @@ class WowFunction
      */
     public static function setEncryptAlg($alg)
     {
-        self::$_encrypt_alg = $alg;
+        self::$encrypt_alg = $alg;
     }
 
     /**
@@ -56,7 +57,7 @@ class WowFunction
      */
     public static function setEncryptKey($key)
     {
-        self::$_encrypt_key = $key;
+        self::$encrypt_key = $key;
     }
 
     /**
@@ -68,7 +69,7 @@ class WowFunction
      */
     public static function setEncryptIv($iv)
     {
-        self::$_encrypt_iv = $iv;
+        self::$encrypt_iv = $iv;
     }
 
     /**
@@ -135,9 +136,12 @@ class WowFunction
         return json_decode(
             json_encode(
                 simplexml_load_string(
-                    $data, 'SimpleXMLElement', LIBXML_NOCDATA
+                    $data,
+                    'SimpleXMLElement',
+                    LIBXML_NOCDATA
                 )
-            ), true
+            ),
+            true
         );
     }
 
@@ -153,17 +157,19 @@ class WowFunction
     {
         $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"utf-8\" ?"."><{$root}></{$root}>");
         $f = create_function(
-            '$f,$c,$a', '
+            '$f,$c,$a',
+            '
             foreach($a as $k=>$v) {
                 if(is_array($v)) {
                     $ch=$c->addChild($k);
                     $f($f,$ch,$v);
-            } else {
-                $c->addChild($k,$v);
+                } else {
+                    $c->addChild($k,$v);
+                }
             }
-            }'
+            '
         );
-        $f($f,$xml,$ar);
+        $f($f, $xml, $ar);
         return $xml->asXML();
     }
 
@@ -198,7 +204,9 @@ class WowFunction
     {
         $data = substr(
             str_replace('.', '', uniqid('', true))
-            . str_pad(crc32($_SERVER['SERVER_ADDR']), 10, '0', STR_PAD_LEFT), 0, 32
+            . str_pad(crc32($_SERVER['SERVER_ADDR']), 10, '0', STR_PAD_LEFT),
+            0,
+            32
         );
 
         if ($dashes === true) {
@@ -246,7 +254,7 @@ class WowFunction
      *
      * @return string
      */
-    function randomString(
+    public static function randomString(
         $len,
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     ) {
@@ -267,14 +275,15 @@ class WowFunction
      *
      * @return string|boolean
      */
-    public static function curlGet($url, $timeout = null)
+    public static function curlGet($url, $timeout = null, $useragent = null)
     {
         if (null !== $timeout) {
-            $timeout = self::$_default_conn_timeout;
+            $timeout = self::$default_conn_timeout;
         }
 
         $ch = curl_init();
         $options = array(CURLOPT_URL => $url,
+            CURLOPT_USERAGENT => ($useragent === null ? self::$default_useragent : $useragent),
             CURLOPT_HEADER => false,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -302,7 +311,7 @@ class WowFunction
      *
      * @return string|boolean
      */
-    public static function curlPost($url, $params = null, $timeout = null)
+    public static function curlPost($url, $params = null, $timeout = null, $useragent = null)
     {
         if (null !== $timeout) {
             $timeout = self::$_default_conn_timeout;
@@ -320,6 +329,7 @@ class WowFunction
 
         $ch = curl_init();
         $options = array(CURLOPT_URL => $url,
+            CURLOPT_USERAGENT => ($useragent === null ? self::$default_useragent : $useragent),
             CURLOPT_HEADER => false,
             CURLOPT_POST => 1,
             CURLOPT_POSTFIELDS => "$params",
@@ -366,7 +376,9 @@ class WowFunction
         $fp = fsockopen(
             $scheme . $parts['host'],
             isset($parts['port'])?$parts['port']:$port,
-            $errno, $errstr, $timeout
+            $errno,
+            $errstr,
+            $timeout
         );
 
         if (!$fp) {
@@ -438,7 +450,9 @@ class WowFunction
         $fp = fsockopen(
             $scheme . $parts['host'],
             isset($parts['port'])?$parts['port']:$port,
-            $errno, $errstr, $timeout
+            $errno,
+            $errstr,
+            $timeout
         );
 
         if (!$fp) {
@@ -507,19 +521,20 @@ class WowFunction
     public static function encode($data, $alg = null, $key = null, $iv = null)
     {
         if ($alg !== null) {
-            self::$_encrypt_alg = $alg;
+            self::$encrypt_alg = $alg;
         }
         if ($key !== null) {
-            self::$_encrypt_key = $key;
+            self::$encrypt_key = $key;
         }
         if ($iv !== null) {
-            self::$_encrypt_iv = $iv;
+            self::$encrypt_iv = $iv;
         }
         return openssl_encrypt(
-            $data, self::$_encrypt_alg,
-            self::$_encrypt_key,
+            $data,
+            self::$encrypt_alg,
+            self::$encrypt_key,
             false,
-            self::$_encrypt_iv
+            self::$encrypt_iv
         );
     }
 
@@ -536,19 +551,20 @@ class WowFunction
     public static function decode($data, $alg = null, $key = null, $iv = null)
     {
         if ($alg !== null) {
-            self::$_encrypt_alg = $alg;
+            self::$encrypt_alg = $alg;
         }
         if ($key !== null) {
-            self::$_encrypt_key = $key;
+            self::$encrypt_key = $key;
         }
         if ($iv !== null) {
-            self::$_encrypt_iv = $iv;
+            self::$encrypt_iv = $iv;
         }
         return openssl_decrypt(
-            $data, self::$_encrypt_alg,
-            self::$_encrypt_key,
+            $data,
+            self::$encrypt_alg,
+            self::$encrypt_key,
             false,
-            self::$_encrypt_iv
+            self::$encrypt_iv
         );
     }
 
@@ -564,13 +580,17 @@ class WowFunction
     public static function aesCtrEncode($data, $key = null, $iv = null)
     {
         if ($key !== null) {
-            self::$_encrypt_key = $key;
+            self::$encrypt_key = $key;
         }
         if ($iv !== null) {
-            self::$_encrypt_iv = $iv;
+            self::$encrypt_iv = $iv;
         }
         return openssl_encrypt(
-            $data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv
+            $data,
+            self::$$encrypt_alg,
+            self::$encrypt_key,
+            false,
+            self::$encrypt_iv
         );
     }
 
@@ -586,13 +606,17 @@ class WowFunction
     public static function aesCtrDecode($data, $key = null, $iv = null)
     {
         if ($key !== null) {
-            self::$_encrypt_key = $key;
+            self::$encrypt_key = $key;
         }
         if ($iv !== null) {
-            self::$_encrypt_iv = $iv;
+            self::$encrypt_iv = $iv;
         }
         return openssl_decrypt(
-            $data, 'AES-256-CTR', self::$_encrypt_key, false, self::$_encrypt_iv
+            $data,
+            self::$$encrypt_alg,
+            self::$encrypt_key,
+            false,
+            self::$encrypt_iv
         );
     }
 
@@ -613,8 +637,8 @@ class WowFunction
         $marker = strtolower($delineator);
 
         // Return text BEFORE the delineator
-        if ($desired === self::$_STRING_BEFORE) {
-            if ($type === self::$_STRING_EXCL) {
+        if ($desired === self::$STRING_BEFORE) {
+            if ($type === self::$STRING_EXCL) {
                 // Return text ESCL of the delineator
                 $split_here = strpos($lc_str, $marker);
             } else {
@@ -625,7 +649,7 @@ class WowFunction
             $parsed_string = substr($string, 0, $split_here);
         } else {
             // Return text AFTER the delineator
-            if ($type === self::_STRING_EXCL) {
+            if ($type === self::STRING_EXCL) {
                 // Return text ESCL of the delineator
                 $split_here = strpos($lc_str, $marker) + strlen($marker);
             } else {
@@ -652,11 +676,17 @@ class WowFunction
     {
         return stringSplit(
             stringSplit(
-                $string, $start, self::$_STRING_AFTER, $type
-            ), $stop, self::$_STRING_BEFORE, $type
+                $string,
+                $start,
+                self::$STRING_AFTER,
+                $type
+            ),
+            $stop,
+            self::$STRING_BEFORE,
+            $type
         );
-        //$temp = stringSplit($string, $start, self::$_STRING_AFTER,, $type);
-        //return stringSplit($temp, $stop, self::$_STRING_BEFORE,, $type);
+        //$temp = stringSplit($string, $start, self::$STRING_AFTER,, $type);
+        //return stringSplit($temp, $stop, self::$STRING_BEFORE,, $type);
     }
 
     /**
