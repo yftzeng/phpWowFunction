@@ -587,7 +587,7 @@ class WowFunction
         }
         return openssl_encrypt(
             $data,
-            self::$$encrypt_alg,
+            self::$encrypt_alg,
             self::$encrypt_key,
             false,
             self::$encrypt_iv
@@ -613,7 +613,7 @@ class WowFunction
         }
         return openssl_decrypt(
             $data,
-            self::$$encrypt_alg,
+            self::$encrypt_alg,
             self::$encrypt_key,
             false,
             self::$encrypt_iv
