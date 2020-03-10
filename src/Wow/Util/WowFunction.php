@@ -352,6 +352,54 @@ class WowFunction
 
     /**
      * @param string $url     url
+     * @param string $params  url parameters
+     * @param string $timeout sencods for connection timeout
+     *
+     * @comment http put by curl
+     *
+     * @return string|boolean
+     */
+    public static function curlPut($url, $params = null, $timeout = null, $useragent = null)
+    {
+        if (null !== $timeout) {
+            $timeout = self::$_default_conn_timeout;
+        }
+
+        if (null !== $params && is_array($params)) {
+            foreach ($params as $key => &$val) {
+                if (is_array($val)) {
+                    $val = implode(',', $val);
+                }
+                $post_params[] = $key.'='.urlencode($val);
+            }
+            $params = implode('&', $post_params);
+        }
+
+        $ch = curl_init();
+        $options = array(CURLOPT_URL => $url,
+            CURLOPT_USERAGENT => ($useragent === null ? self::$default_useragent : $useragent),
+            CURLOPT_HEADER => false,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => "$params",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_CONNECTTIMEOUT => $timeout,
+            CURLOPT_TIMEOUT => $timeout
+        );
+        curl_setopt_array($ch, $options);
+        // http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
+        $output = curl_exec($ch);
+        if ($output === false || curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+            curl_close($ch);
+            return false;
+        }
+        curl_close($ch);
+        return $output;
+    }
+
+    /**
+     * @param string $url     url
      * @param string $timeout sencods for connection timeout
      *
      * @comment async http get by fsockopen
@@ -579,6 +627,12 @@ class WowFunction
      */
     public static function aesCtrEncode($data, $key = null, $iv = null)
     {
+        // Sanitize input data
+        // e.g. Fhy BVPbaBmPnRxeTt8qU6K8QgyEUnl4esZB7HS4MZw=
+        //      to
+        //      Fhy+BVPbaBmPnRxeTt8qU6K8QgyEUnl4esZB7HS4MZw=
+        $data = str_replace(array('-', '_', ' '), array('+', '/', '+'), $data);
+
         if ($key !== null) {
             self::$encrypt_key = $key;
         }
